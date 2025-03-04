@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------
-# AUTHOR: your name
-# FILENAME: title of the source file
-# SPECIFICATION: description of the program
+# AUTHOR: Julia Chaidez
+# FILENAME: decision_tree_2
+# SPECIFICATION: train, test, and output the performance of 3 models created by using each training set on the test set provided
 # FOR: CS 4210- Assignment #2
-# TIME SPENT: how long it took you to complete the assignment
+# TIME SPENT: 1 hour
 #-----------------------------------------------------------*/
 
 #IMPORTANT NOTE: DO NOT USE ANY ADVANCED PYTHON LIBRARY TO COMPLETE THIS CODE SUCH AS numpy OR pandas. You have to work here only with standard
@@ -29,12 +29,26 @@ for ds in dataSets:
                 dbTraining.append (row)
 
     #Transform the original categorical training features to numbers and add to the 4D array X.
-    #For instance Young = 1, Prepresbyopic = 2, Presbyopic = 3, X = [[1, 1, 1, 1], [2, 2, 2, 2], ...]]
-    #--> add your Python code here
+    age = {'Young': 1, 'Prepresbyopic': 2, 'Presbyopic': 3}
+    spectacle = {'Myope': 1, 'Hypermetrope': 2}
+    astigmatism = {'No': 1, 'Yes': 2}
+    tear = {'Reduced': 1, 'Normal': 2}
+
+    for row in dbTraining:
+        X.append([
+            age[row[0]],
+            spectacle[row[1]],
+            astigmatism[row[2]],
+            tear[row[3]]
+        ])
 
     #Transform the original categorical training classes to numbers and add to the vector Y.
-    #For instance Yes = 1 and No = 2, Y = [1, 1, 2, 2, ...]
-    #--> add your Python code here
+    recLenses = {'Yes': 1, 'No': 2}
+
+    for row in dbTraining:
+        Y.append(recLenses[row[4]])
+
+    accuracies = [] #store the accuracies
 
     #Loop your training and test tasks 10 times here
     for i in range (10):
@@ -44,23 +58,42 @@ for ds in dataSets:
        clf = clf.fit(X, Y)
 
        #Read the test data and add this data to dbTest
-       #--> add your Python code here
+       dbTest = []
+       with open("contact_lens_test.csv", 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for i, row in enumerate(reader):
+                if i > 0:  # Skipping the header
+                    dbTest.append(row)
 
+       correctPredictions = 0
+       totalPredictions = len(dbTest)
+       
        for data in dbTest:
-           #Transform the features of the test instances to numbers following the same strategy done during training,
-           #and then use the decision tree to make the class prediction. For instance: class_predicted = clf.predict([[3, 1, 2, 1]])[0]
-           #where [0] is used to get an integer as the predicted class label so that you can compare it with the true label
-           #--> add your Python code here
+        #Transform the features of the test instances to numbers following the same strategy done during training,
+        #and then use the decision tree to make the class prediction. For instance: class_predicted = clf.predict([[3, 1, 2, 1]])[0]
+        #where [0] is used to get an integer as the predicted class label so that you can compare it with the true label
+        testSample = [
+            age[data[0]],
+            spectacle[data[1]],
+            astigmatism[data[2]],
+            tear[data[3]]
+        ]
 
-           #Compare the prediction with the true label (located at data[4]) of the test instance to start calculating the accuracy.
-           #--> add your Python code here
+        # Predict the class
+        class_predicted = clf.predict([testSample])[0]
+
+        #Compare the prediction with the true label (located at data[4]) of the test instance to start calculating the accuracy.
+        if class_predicted == recLenses[data[4]]:
+            correctPredictions += 1
 
     #Find the average of this model during the 10 runs (training and test set)
-    #--> add your Python code here
+    accuracy = correctPredictions / totalPredictions
+    accuracies.append(accuracy)
 
     #Print the average accuracy of this model during the 10 runs (training and test set).
     #Your output should be something like that: final accuracy when training on contact_lens_training_1.csv: 0.2
-    #--> add your Python code here
+    average_accuracy = sum(accuracies) / len(accuracies)
+    print(f"Final accuracy when training on {ds}: {average_accuracy:.2f}")
 
 
 
